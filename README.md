@@ -80,32 +80,61 @@
 - **核心思路**：在现有 Runner 层面抽象设备会话（session）列表，由调度器根据配置并行创建多个 `DamaiAppTicketRunner` 实例。
 - **配置扩展**：计划支持 `devices` 数组，携带每台设备的 `server_url` / `device_caps`；GUI 侧将增加多选控件和批量校验。
 - **执行模式**：
-	- 单机并行：同一主机多个模拟器/真机，统一由 Appium Grid 或多个 Server 节点调度。
-	- 分布式：通过 CLI/脚本在多台机器触发 runner，再通过日志上报/远程存储汇总结果。
+    - 单机并行：同一主机多个模拟器/真机，统一由 Appium Grid 或多个 Server 节点调度。
+    - 分布式：通过 CLI/脚本在多台机器触发 runner，再通过日志上报/远程存储汇总结果。
 - **风险与依赖**：需考虑 Appium Server 连接上限、ADB 并发性能，以及多进程日志写入的线程安全性。
 
 ### 定时任务 / 自动守候
 
 - **触发机制**：
-	- Windows：提供 `.ps1`/`.bat` 示例结合任务计划程序（Task Scheduler）。
-	- Linux/macOS：提供 `cron` 与 `systemd` unit 模板，调用 `python -m damai_appium.damai_app_v2`。
+    - Windows：提供 `.ps1`/`.bat` 示例结合任务计划程序（Task Scheduler）。
+    - Linux/macOS：提供 `cron` 与 `systemd` unit 模板，调用 `python -m damai_appium.damai_app_v2`。
 - **参数注入**：外部调度器以环境变量或命令行参数注入场次、重试次数，实现定制化场景。
 - **监控反馈**：预留 Webhook / 本地 JSON 日志查询接口，后续可接入飞书/企业微信通知。
 - **后续工作**：完善脚本容错（重试/超时控制），并在 README 增补一键生成计划任务的示例片段。
 
 ## 🧩 环境要求
 
+### Web 模式
 - **Python 3.7+**
 - **Chrome 浏览器** 与 **ChromeDriver**（版本需匹配）
-- **核心依赖库**：
-  - `selenium`
-  - `Appium-Python-Client`
-  - `tkinter`（Python 标准库）
-  - `pickle`（Python 标准库）
-- 建议使用 `pip install -r requirements.txt` 自动安装所有依赖。
-- Windows 用户可以参考 [Windows 环境安装指南](docs/setup/windows_installation.md) 完成依赖配置。
+- **核心依赖库**：`selenium`, `pydantic`, `tkinter`
 
-## � 安装步骤（快速上手）
+### App 模式
+- **Python 3.9+**
+- **Node.js 18+ LTS** 和 **npm**
+- **Appium Server 2.x**
+- **Android Platform Tools** (ADB)
+- **核心依赖库**：`Appium-Python-Client>=3.1.0`, `selenium`, `pydantic`
+
+### 🔍 环境检测工具（新增）
+
+快速检查所有依赖是否安装：
+
+```bash
+python scripts/check_appium_env.py
+```
+
+该脚本会自动检测 Node.js、Appium Server、Python 包、ADB 工具等。详见 [脚本工具文档](scripts/README.md)。
+
+## 📦 安装步骤
+
+### 🚀 方式一：自动安装（推荐）
+
+使用自动化安装脚本一键配置 Appium 环境：
+
+```bash
+# Windows - 双击运行或在命令行执行
+scripts\install_appium.bat
+
+# Linux/macOS
+chmod +x scripts/install_appium.sh
+./scripts/install_appium.sh
+```
+
+安装脚本会自动完成 Appium Server、驱动、Python 依赖包的安装，并提供 ADB 配置指导。
+
+### 📝 方式二：手动安装
 
 以下步骤适用于 Windows PowerShell，其他平台命令可自行等效替换。
 
@@ -132,8 +161,8 @@ appium-doctor --android
 ```
 
 - 安装 Android Platform Tools（包含 adb），并将其 `platform-tools` 目录加入系统环境变量 `PATH`：
-	- 参考官方下载页：<https://developer.android.com/tools/releases/platform-tools>
-	- 将 `C:\\Android\\platform-tools`（或你的解压路径）追加到 PATH 后，建议重启系统以便所有程序生效。
+    - 参考官方下载页：<https://developer.android.com/tools/releases/platform-tools>
+    - 将 `C:\\Android\\platform-tools`（或你的解压路径）追加到 PATH 后，建议重启系统以便所有程序生效。
 
 1. 验证环境
 
@@ -159,9 +188,9 @@ adb devices -l
 1. 启动本工具的 GUI
 
 - 方式一：Windows 脚本
-	- 双击根目录的 `一键启动.bat`（或 `调试启动.bat`）
+    - 双击根目录的 `一键启动.bat`（或 `调试启动.bat`）
 - 方式二：Python 启动
-	- 在已激活的虚拟环境中运行：`pythonw start_gui.pyw`
+    - 在已激活的虚拟环境中运行：`pythonw start_gui.pyw`
 
 如需更完整的 App 模式图文说明与常见问题，请阅读：[App 模式零基础上手指南](docs/guides/APP_MODE_README.md)。
 
