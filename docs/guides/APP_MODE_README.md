@@ -4,6 +4,45 @@
 
 ---
 
+## 🚀 快速开始（5 分钟配置）
+
+如果你想快速开始，按照以下步骤操作：
+
+### 第 1 步：检查环境
+
+```bash
+# 下载项目后，在项目根目录运行
+python scripts/check_appium_env.py
+```
+
+### 第 2 步：自动安装（推荐）
+
+```bash
+# Windows - 双击或运行
+scripts\install_appium.bat
+
+# Linux/macOS - 运行
+chmod +x scripts/install_appium.sh
+./scripts/install_appium.sh
+```
+
+### 第 3 步：连接设备
+
+```bash
+# 连接手机，开启 USB 调试，然后验证
+adb devices -l
+```
+
+### 第 4 步：配置并启动
+
+1. 编辑 `damai_appium/config.jsonc`（参考 `config/appium_config.example.json`）
+2. 启动 Appium Server：`appium`
+3. 启动图形界面：`python start_gui.pyw`
+
+> 💡 详细步骤请继续阅读下文，遇到问题请查看 [第 9 节：常见问题 & 故障排查](#9-常见问题--故障排查)
+
+---
+
 ## 1. 准备工作一览
 
 | 项目 | 目的 | 推荐版本 | 下载/查看方式 |
@@ -105,6 +144,134 @@ setx ANDROID_HOME "C:\Android"
        cd damai-ticket-assistant
        python -m pip install -r requirements.txt
        ```
+
+---
+
+## 2.1 自动化安装工具（推荐）
+
+为了简化环境配置过程，项目提供了自动化安装脚本和环境检测工具。
+
+### 环境检测脚本
+
+在安装任何组件之前或之后，都可以运行环境检测脚本来检查当前环境状态：
+
+```powershell
+# Windows (PowerShell 或 CMD)
+python scripts/check_appium_env.py
+
+# Linux/macOS
+python3 scripts/check_appium_env.py
+```
+
+该脚本会检测：
+- ✅ Node.js 和 npm 版本
+- ✅ Appium Server 安装状态
+- ✅ Python 包依赖（Appium-Python-Client 等）
+- ✅ ADB 工具和已连接的设备
+- ✅ Android SDK 环境变量配置
+- ✅ Appium 驱动（UIAutomator2）
+
+**输出示例：**
+```
+==============================================================
+                     检查 Node.js 环境
+==============================================================
+
+✅ Node.js 已安装: v18.16.0
+✅ npm 已安装: 9.5.1
+
+==============================================================
+                     检查 Appium Server
+==============================================================
+
+✅ Appium Server 已安装: 2.0.0
+ℹ️  安装路径: C:\Users\...\npm\appium.cmd
+
+==============================================================
+                     环境检测摘要
+==============================================================
+
+检测结果：
+  Node.js              : 通过
+  Appium Server        : 通过
+  Python 包            : 通过
+  ADB                  : 通过
+  Appium 驱动          : 通过
+
+✅ 所有环境检测通过！您可以开始使用 Appium 进行自动化测试。
+```
+
+### 自动安装脚本
+
+#### Windows 用户
+
+双击运行或在命令提示符中执行：
+
+```cmd
+scripts\install_appium.bat
+```
+
+该脚本会自动：
+1. 检查 Node.js 和 npm（如未安装会提示手动安装）
+2. 安装 Appium Server
+3. 安装 Appium Doctor（诊断工具）
+4. 安装 UIAutomator2 驱动
+5. 安装 Python 依赖包
+6. 提供 ADB 和环境变量配置指导
+7. 自动运行环境检测
+
+#### Linux/macOS 用户
+
+```bash
+# 添加执行权限
+chmod +x scripts/install_appium.sh
+
+# 运行安装脚本
+./scripts/install_appium.sh
+```
+
+该脚本会自动：
+1. 检测操作系统和发行版
+2. 安装 Node.js 和 npm（通过包管理器）
+3. 安装 Appium Server 和相关工具
+4. 安装 Python 依赖包
+5. 提供 Android Platform Tools 安装指导
+6. 配置环境变量建议
+7. 自动运行环境检测
+
+**macOS Homebrew 用户可以一键安装 ADB：**
+脚本会询问是否使用 Homebrew 安装 Android Platform Tools。
+
+### 手动安装 vs 自动安装
+
+| 方式 | 优点 | 适用场景 |
+|------|------|----------|
+| **自动安装脚本** | 一键完成大部分安装，减少出错 | 初次配置、批量部署 |
+| **手动安装（第 2 节）** | 完全掌控每个步骤，易于排查问题 | 自定义配置、问题诊断 |
+
+> **建议流程**：先尝试自动安装脚本，如遇问题再参考手动安装步骤逐项检查。
+
+---
+
+## 2.2 安装后验证
+
+无论使用自动安装还是手动安装，完成后请务必验证：
+
+```powershell
+# 1. 检查所有依赖
+python scripts/check_appium_env.py
+
+# 2. 检查 Appium 驱动
+appium driver list --installed
+
+# 3. 检查已连接设备
+adb devices -l
+
+# 4. 运行 Appium Doctor（可选但推荐）
+appium-doctor --android
+```
+
+如果所有检查都通过，说明环境配置完成！
 
 ---
 
@@ -230,12 +397,66 @@ pwsh ./scripts/app_mode_quickstart.ps1 -ConfigPath .\damai_appium\config.jsonc -
 
 | 现象 | 可能原因 | 解决方案 |
 | --- | --- | --- |
+| `未检测到 Appium 运行环境` | Python 包未安装或安装不完整 | 运行 `python scripts/check_appium_env.py` 检查环境，然后执行 `pip install -r requirements.txt` |
 | `server_url 不能为空` 提示 | 配置文件未填写或 Appium 未启动 | 确认 `appium` 服务窗口仍在运行，并确保 `server_url` 字段以 `http://` 开头 |
-| `adb devices` 没有设备 | 数据线/驱动问题 | 换线、更新 USB 驱动、重新授权 USB 调试 |
-| 日志停在 `CONNECTING` 阶段 | Appium 无法连接到设备 | 检查 `device_caps.udid` 是否与 `adb devices` 输出一致 |
+| `未找到 Node.js` | Node.js 未安装或未添加到 PATH | 访问 https://nodejs.org/ 下载安装，安装时勾选 "Add to PATH" |
+| `未找到 Appium CLI` | Appium Server 未安装 | 运行 `npm install -g appium` 安装，或使用自动安装脚本 |
+| `未找到 adb` | Android Platform Tools 未安装 | 下载 Platform Tools 并添加到 PATH，或运行 `scripts/install_appium.bat` |
+| `adb devices` 没有设备 | 数据线/驱动问题或未授权 | 换线、更新 USB 驱动、重新授权 USB 调试，确保设备显示 "device" 状态 |
+| 日志停在 `CONNECTING` 阶段 | Appium 无法连接到设备 | 1. 检查 `device_caps.udid` 是否与 `adb devices` 输出一致<br>2. 确保 Appium Server 正在运行<br>3. 检查大麦 App 是否已安装 |
 | 日志提示 `NO SUCH ELEMENT` | App 页面结构发生变化 | 尝试提高 `wait_timeout`，或手动检查当前页面元素是否与大麦 App 更新保持一致 |
 | CLI 直接退出，返回码 2 | 配置校验失败 | 终端会列出具体错误字段；根据提示修改配置后重试 |
+| `Appium-Python-Client` 导入错误 | Python 包版本不兼容 | 运行 `pip install --upgrade Appium-Python-Client>=3.1.0` |
+| UIAutomator2 驱动未安装 | Appium 2.x 需要单独安装驱动 | 运行 `appium driver install uiautomator2` |
 | 需要多台设备同时执行 | 当前版本仅支持**顺序执行**多个会话 | 根据配置示例添加 `devices` 数组，每台设备会依次运行 |
+
+### 9.1 环境问题快速诊断流程
+
+如果遇到环境相关问题，按以下顺序排查：
+
+1. **运行环境检测脚本**
+   ```powershell
+   python scripts/check_appium_env.py
+   ```
+   这会显示所有缺失或配置错误的组件。
+
+2. **检查具体组件**
+   ```powershell
+   # 检查 Node.js
+   node --version
+   npm --version
+   
+   # 检查 Appium
+   appium -v
+   appium driver list --installed
+   
+   # 检查 ADB
+   adb version
+   adb devices -l
+   
+   # 检查 Python 包
+   pip list | grep -i appium
+   ```
+
+3. **使用 Appium Doctor 诊断**
+   ```powershell
+   appium-doctor --android
+   ```
+   它会告诉你哪些必需和可选的依赖缺失。
+
+4. **查看详细日志**
+   - Appium Server 日志：查看运行 `appium` 命令的终端输出
+   - 项目日志：GUI 右侧日志面板或使用 `--export-report` 导出的 JSON 文件
+
+5. **重新安装**
+   如果问题仍未解决，可以尝试：
+   ```powershell
+   # Windows
+   scripts\install_appium.bat
+   
+   # Linux/macOS
+   ./scripts/install_appium.sh
+   ```
 
 ---
 
